@@ -15,3 +15,6 @@ npm-debug.log*
 # Environment / secrets
 .env
 .env.*
+
+# Internal developer docs (not for repo)
+INTERNAL.md
