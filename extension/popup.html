@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WatchSync</title>
+    <style>
+      :root {
+        --bg: #0e0f1a;
+        --panel: #181a2c;
+        --panel-2: #21243d;
+        --accent: #6c5ce7;
+        --accent-2: #a29bfe;
+        --text: #eef0ff;
+        --muted: #9aa0c0;
+        --good: #2ecc71;
+        --border: #2c2f4a;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        width: 320px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .brand h1 {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .logo {
+        width: 22px; height: 22px; border-radius: 6px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 13px;
+      }
+      .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+
+      .platform {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .platform .pill {
+        margin-left: auto;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .pill.ok { background: rgba(46, 204, 113, 0.15); color: var(--good); }
+      .pill.no { background: rgba(255, 99, 99, 0.15); color: #ff8585; }
+
+      .section { display: flex; flex-direction: column; gap: 8px; }
+      .divider {
+        text-align: center; color: var(--muted); font-size: 11px;
+        margin: 12px 0; position: relative;
+      }
+      .divider::before, .divider::after {
+        content: ""; position: absolute; top: 50%; width: 38%; height: 1px;
+        background: var(--border);
+      }
+      .divider::before { left: 0; }
+      .divider::after { right: 0; }
+
+      button.primary {
+        width: 100%;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: transform 0.08s ease, opacity 0.2s ease;
+      }
+      button.primary:hover { transform: translateY(-1px); }
+      button.primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+      .join-row { display: flex; gap: 8px; }
+      input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 13px;
+      }
+      input[type="text"]::placeholder { color: var(--muted); }
+      button.ghost {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .active-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .active-card .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+      .share-row { display: flex; gap: 6px; }
+      .share-row input { font-size: 11px; }
+      .members { font-size: 12px; color: var(--accent-2); margin-top: 8px; }
+
+      .footer { margin-top: 14px; }
+      details { font-size: 12px; color: var(--muted); }
+      summary { cursor: pointer; }
+      details input { width: 100%; margin-top: 8px; }
+
+      .status { font-size: 12px; margin-top: 10px; min-height: 16px; }
+      .status.error { color: #ff8585; }
+      .status.ok { color: var(--good); }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="brand">
+      <span class="logo">⚡</span>
+      <h1>WatchSync</h1>
+    </div>
+    <p class="subtitle">Watch together, perfectly in sync.</p>
+
+    <div class="platform">
+      <span>Detected platform</span>
+      <span class="pill no" id="platformPill">Unsupported</span>
+    </div>
+
+    <!-- Inactive state: create / join -->
+    <div id="inactiveView">
+      <div class="section">
+        <button class="primary" id="createBtn" disabled>Create a watch party</button>
+      </div>
+      <div class="divider">or join</div>
+      <div class="section">
+        <div class="join-row">
+          <input type="text" id="joinInput" placeholder="Paste room link or ID" />
+          <button class="ghost" id="joinBtn">Join</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active state: show room + share link -->
+    <div id="activeView" class="hidden">
+      <div class="active-card">
+        <div class="label">Share this link with friends</div>
+        <div class="share-row">
+          <input type="text" id="shareLink" readonly />
+          <button class="ghost" id="copyBtn">Copy</button>
+        </div>
+        <div class="members" id="membersText">1 watching</div>
+      </div>
+      <button class="primary" id="leaveBtn" style="background: linear-gradient(135deg,#e74c3c,#ff7675)">
+        Leave party
+      </button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="footer">
+      <details>
+        <summary>Advanced: signaling server</summary>
+        <input type="text" id="serverUrl" placeholder="ws://localhost:8080" />
+      </details>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

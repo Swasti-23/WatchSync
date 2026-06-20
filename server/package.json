@@ -1,0 +1,26 @@
+{
+  "name": "watchsync-signaling-server",
+  "version": "1.0.0",
+  "description": "Lean in-memory WebSocket signaling/relay server for the WatchSync watch-party browser extension.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "watch-party",
+    "websocket",
+    "signaling",
+    "teleparty",
+    "video-sync"
+  ],
+  "author": "WatchSync",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
