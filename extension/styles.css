@@ -504,16 +504,44 @@
 /* ---------- Footer / compose ---------- */
 .ws-footer {
   flex: 0 0 auto;
-  padding: 10px 14px 14px;
+  padding: 8px 14px 14px;
   background: #181a2c;
   border-top: 1px solid #2c2f4a;
   position: relative;
+}
+.ws-reaction-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid rgba(44, 47, 74, 0.65);
+  margin-bottom: 8px;
+}
+.ws-reaction-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.1s ease;
+}
+.ws-reaction-btn:hover {
+  background: rgba(108, 92, 231, 0.22);
+  transform: scale(1.08);
+}
+.ws-reaction-btn:active {
+  transform: scale(0.95);
 }
 .ws-emoji-popover {
   position: absolute;
   left: 14px;
   right: 14px;
-  bottom: 62px;
+  bottom: 112px;
   z-index: 10;
   border-radius: 12px;
   overflow: hidden;

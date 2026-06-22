@@ -51,6 +51,16 @@
 
   const GUEST_ADJECTIVES = ['Swift', 'Cosmic', 'Neon', 'Lunar', 'Turbo', 'Pixel'];
 
+  /** Teleparty-style quick reactions (bar + floating overlay). */
+  const REACTIONS = [
+    { id: 'happy', emoji: '😄', label: 'Happy' },
+    { id: 'laugh', emoji: '😂', label: 'Laughing' },
+    { id: 'angry', emoji: '😠', label: 'Angry' },
+    { id: 'shocked', emoji: '🤯', label: 'Shocked' },
+    { id: 'celebrate', emoji: '🎉', label: 'Celebrate' },
+  ];
+  const REACTION_BY_ID = Object.fromEntries(REACTIONS.map((r) => [r.id, r]));
+
   // Some platforms (Crunchyroll) host the <video> inside a same-domain iframe.
   // The full app (UI + WebSocket) only runs in the top frame; sub-frames run a
   // tiny bridge that relays their video's events to/from the top frame.
@@ -231,7 +241,7 @@
 
   /* Embedded sidebar CSS — used when styles.css cannot be fetched (e.g. after an
      extension reload invalidates chrome.runtime on an already-open tab). */
-  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-launcher.ws-has-unread::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%;margin-top:6px}.ws-msg-user.ws-msg-continued{margin-top:1px}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar-spacer{visibility:hidden;border-color:transparent;background:transparent}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:6px 10px 5px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:3px}.ws-msg-content{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 8px}.ws-msg-text{color:#eef0ff;flex:1 1 auto;min-width:0}.ws-msg-time{font-size:10px;color:#9aa0c0;line-height:1.2;flex:0 0 auto;white-space:nowrap;margin-left:auto}.ws-unread-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;list-style:none;color:#a29bfe;font-size:11px;font-weight:600}.ws-unread-divider::before,.ws-unread-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#5340d6,transparent)}.ws-msg-system{align-self:center;text-align:center;margin-top:8px;margin-bottom:4px}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}.ws-emoji-popover{position:absolute;left:14px;right:14px;bottom:62px;z-index:10;border-radius:12px;overflow:hidden;border:1px solid #2c2f4a;box-shadow:0 -8px 28px rgba(0,0,0,.45);background:#21243d}.ws-emoji-picker-host{height:300px}.ws-ep{display:flex;flex-direction:column;height:100%}.ws-ep-tabs{display:flex;gap:4px;padding:8px;overflow-x:auto;border-bottom:1px solid #2c2f4a}.ws-ep-tab{width:32px;height:32px;border:none;border-radius:8px;background:transparent;font-size:18px;cursor:pointer;flex:0 0 32px}.ws-ep-tab.ws-ep-tab-active{background:rgba(108,92,231,.25)}.ws-ep-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px}.ws-ep-item{border:none;background:transparent;font-size:22px;cursor:pointer;border-radius:6px;padding:4px 0}.ws-ep-item:hover{background:rgba(255,255,255,.08)}.ws-compose{display:flex;align-items:center;gap:6px}.ws-input{border-radius:22px}.ws-icon-action{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:transparent;color:#9aa0c0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-icon-action.ws-active{color:#a29bfe;background:rgba(108,92,231,.18)}.ws-send-btn{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-send-btn:disabled{opacity:.45;cursor:not-allowed}`;
+  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-launcher.ws-has-unread::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%;margin-top:6px}.ws-msg-user.ws-msg-continued{margin-top:1px}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar-spacer{visibility:hidden;border-color:transparent;background:transparent}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:6px 10px 5px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:3px}.ws-msg-content{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 8px}.ws-msg-text{color:#eef0ff;flex:1 1 auto;min-width:0}.ws-msg-time{font-size:10px;color:#9aa0c0;line-height:1.2;flex:0 0 auto;white-space:nowrap;margin-left:auto}.ws-unread-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;list-style:none;color:#a29bfe;font-size:11px;font-weight:600}.ws-unread-divider::before,.ws-unread-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#5340d6,transparent)}.ws-msg-system{align-self:center;text-align:center;margin-top:8px;margin-bottom:4px}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}.ws-emoji-popover{position:absolute;left:14px;right:14px;bottom:112px;z-index:10;border-radius:12px;overflow:hidden;border:1px solid #2c2f4a;box-shadow:0 -8px 28px rgba(0,0,0,.45);background:#21243d}.ws-emoji-picker-host{height:300px}.ws-ep{display:flex;flex-direction:column;height:100%}.ws-ep-tabs{display:flex;gap:4px;padding:8px;overflow-x:auto;border-bottom:1px solid #2c2f4a}.ws-ep-tab{width:32px;height:32px;border:none;border-radius:8px;background:transparent;font-size:18px;cursor:pointer;flex:0 0 32px}.ws-ep-tab.ws-ep-tab-active{background:rgba(108,92,231,.25)}.ws-ep-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px}.ws-ep-item{border:none;background:transparent;font-size:22px;cursor:pointer;border-radius:6px;padding:4px 0}.ws-ep-item:hover{background:rgba(255,255,255,.08)}.ws-reaction-bar{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 2px 8px;border-bottom:1px solid rgba(44,47,74,.65);margin-bottom:8px}.ws-reaction-btn{flex:1;min-width:0;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,.04);font-size:22px;cursor:pointer}.ws-reaction-btn:hover{background:rgba(108,92,231,.22);transform:scale(1.08)}.ws-compose{display:flex;align-items:center;gap:6px}.ws-input{border-radius:22px}.ws-icon-action{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:transparent;color:#9aa0c0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-icon-action.ws-active{color:#a29bfe;background:rgba(108,92,231,.18)}.ws-send-btn{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-send-btn:disabled{opacity:.45;cursor:not-allowed}`;
 
   /* ---------------------------------------------------------------------- */
   /* PlayerController — robust abstraction over the platform's <video>      */
@@ -532,13 +542,72 @@
   }
 
   /* ---------------------------------------------------------------------- */
+  /* ReactionLayer — floating emoji overlays on the video page               */
+  /* ---------------------------------------------------------------------- */
+
+  class ReactionLayer {
+    constructor() {
+      this._ensureStyles();
+      let layer = document.getElementById('watchsync-reaction-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'watchsync-reaction-layer';
+        layer.setAttribute('aria-hidden', 'true');
+        (document.documentElement || document.body).appendChild(layer);
+      }
+      this.layer = layer;
+    }
+
+    _ensureStyles() {
+      if (document.getElementById('watchsync-reaction-style')) return;
+      const style = document.createElement('style');
+      style.id = 'watchsync-reaction-style';
+      style.textContent =
+        '#watchsync-reaction-layer{position:fixed;inset:0;pointer-events:none;z-index:2147483646;overflow:hidden}' +
+        '.ws-float-reaction{position:absolute;bottom:-10vh;transform:translateX(-50%);font-size:52px;line-height:1;' +
+        'animation:wsReactionFloat 3s ease-out forwards;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));' +
+        'will-change:transform,opacity;user-select:none}' +
+        '@keyframes wsReactionFloat{0%{transform:translateX(-50%) translateY(0) scale(.5);opacity:0}' +
+        '12%{opacity:1;transform:translateX(-50%) translateY(-8vh) scale(1.15)}' +
+        '25%{transform:translateX(-50%) translateY(-18vh) scale(1)}' +
+        '75%{opacity:1}' +
+        '100%{transform:translateX(-50%) translateY(-92vh) scale(.95);opacity:0}}';
+      (document.head || document.documentElement).appendChild(style);
+    }
+
+    spawn(emoji) {
+      if (!this.layer || !emoji) return;
+      const el = document.createElement('div');
+      el.className = 'ws-float-reaction';
+      el.textContent = emoji;
+      el.style.left = `${10 + Math.random() * 80}%`;
+      el.style.animationDuration = `${2.6 + Math.random() * 0.9}s`;
+      el.style.fontSize = `${44 + Math.random() * 20}px`;
+      this.layer.appendChild(el);
+      const cleanup = () => el.remove();
+      el.addEventListener('animationend', cleanup, { once: true });
+      setTimeout(cleanup, 4500);
+    }
+
+    destroy() {
+      try {
+        this.layer?.replaceChildren();
+        this.layer?.remove();
+        this.layer = null;
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------------- */
   /* ChatSidebar — isolated Shadow DOM UI                                   */
   /* ---------------------------------------------------------------------- */
 
   class ChatSidebar {
     /**
      * @param {object} callbacks
-     *   onSendMessage(text), onRenameSelf(name), onAvatarChange(id), onClose()
+     *   onSendMessage(text), onRenameSelf(name), onAvatarChange(id), onReaction(id), onClose()
      */
     constructor(callbacks) {
       this.callbacks = callbacks;
@@ -605,6 +674,7 @@
       this._cacheRefs();
       this.refs.launcher = launcher;
       this._buildAvatarGrid();
+      this._buildReactionBar();
       this._wireEvents();
 
       // The UI is now interactive: flush any state set before the build finished.
@@ -736,6 +806,7 @@
             <ul class="ws-messages" data-ref="messages"></ul>
 
             <footer class="ws-footer">
+              <div class="ws-reaction-bar" data-ref="reactionBar" role="toolbar" aria-label="Quick reactions"></div>
               <form class="ws-compose" data-ref="composeForm">
                 <input class="ws-input" data-ref="msgInput" placeholder="Type a message…" maxlength="500" autocomplete="off" />
                 <button class="ws-icon-action ws-emoji-btn" type="button" data-ref="emojiBtn" title="Emoji" aria-label="Emoji">
@@ -792,6 +863,26 @@
       this.shadow.querySelectorAll('[data-ref]').forEach((el) => {
         this.refs[el.getAttribute('data-ref')] = el;
       });
+    }
+
+    _buildReactionBar() {
+      if (!this.refs.reactionBar) return;
+      this.refs.reactionBar.replaceChildren();
+      for (const reaction of REACTIONS) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ws-reaction-btn';
+        btn.dataset.reaction = reaction.id;
+        btn.title = reaction.label;
+        btn.setAttribute('aria-label', reaction.label);
+        btn.textContent = reaction.emoji;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.callbacks.onReaction?.(reaction.id);
+        });
+        this.refs.reactionBar.appendChild(btn);
+      }
     }
 
     _wireEvents() {
@@ -1397,10 +1488,12 @@
         onSendMessage: (text) => this.sendChat(text),
         onRenameSelf: (name) => this.renameSelf(name),
         onAvatarChange: (id) => this.changeAvatar(id),
+        onReaction: (id) => this.sendReaction(id),
         onClose: () => this.leave(),
         getVideo: () => this.player.video || this.adapter.getVideo(),
         skipPlayerSqueeze: adapter.supportsPlayerSqueeze === false,
       });
+      this.reactionLayer = new ReactionLayer();
       this.ui.setSelfName(this.selfName);
       this.ui.setSelfAvatar(this.selfAvatar);
     }
@@ -1695,6 +1788,13 @@
           break;
         }
 
+        case 'REACTION': {
+          const p = message.payload || {};
+          const reaction = REACTION_BY_ID[p.id];
+          if (reaction) this.reactionLayer?.spawn(reaction.emoji);
+          break;
+        }
+
         case 'ERROR': {
           console.warn('[WatchSync] Server error:', message.message);
           break;
@@ -1918,6 +2018,15 @@
 
     /* ----- chat & profile ----- */
 
+    sendReaction(reactionId) {
+      const reaction = REACTION_BY_ID[reactionId];
+      if (!reaction) return;
+      this.reactionLayer?.spawn(reaction.emoji);
+      this.send('REACTION', {
+        payload: { id: reactionId, sender: this.selfName },
+      });
+    }
+
     sendChat(text) {
       const payload = {
         text,
@@ -1975,6 +2084,7 @@
         /* ignore */
       }
       this.player.destroy();
+      this.reactionLayer?.destroy();
       this.ui.destroy();
       window.__WATCHSYNC_APP__ = null;
     }

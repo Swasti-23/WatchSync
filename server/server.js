@@ -295,6 +295,17 @@ function handleMessage(state, message) {
       break;
     }
 
+    case 'REACTION': {
+      if (!state.roomId) return;
+      broadcastToRoom(
+        state.roomId,
+        'REACTION',
+        { from: state.clientId, payload: message.payload || {} },
+        state.clientId
+      );
+      break;
+    }
+
     case 'PING': {
       send(state.socket, 'PONG');
       break;
