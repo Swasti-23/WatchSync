@@ -48,6 +48,7 @@ async function ensureContentScript(tabId) {
           'injection_hosts/youtube.js',
           'injection_hosts/crunchyroll.js',
           'avatars.js',
+          'emoji-panel.js',
           'content.js',
         ],
       });

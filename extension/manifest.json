@@ -60,6 +60,7 @@
         "injection_hosts/youtube.js",
         "injection_hosts/crunchyroll.js",
         "avatars.js",
+        "emoji-panel.js",
         "content.js"
       ],
       "run_at": "document_idle",
@@ -74,6 +75,7 @@
         "injection_hosts/youtube.js",
         "injection_hosts/crunchyroll.js",
         "avatars.js",
+        "emoji-panel.js",
         "content.js"
       ],
       "run_at": "document_idle",
@@ -82,7 +84,10 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["styles.css"],
+      "resources": [
+        "styles.css",
+        "lib/emoji-data.json"
+      ],
       "matches": [
         "*://*.netflix.com/*",
         "*://*.primevideo.com/*",

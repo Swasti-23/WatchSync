@@ -1,5 +1,6 @@
 # Dependencies
 server/node_modules/
+extension/node_modules/
 
 # OS / editor
 .DS_Store

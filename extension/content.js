@@ -175,7 +175,7 @@
       const patch = {};
       if (name) patch.profileName = name;
       if (avatar) patch.profileAvatar = avatar;
-      if (Object.keys(patch).length) chrome.storage?.local.set(patch);
+      if (Object.keys(patch).length) chrome.storage?.local?.set(patch);
     } catch {
       /* ignore */
     }
@@ -231,7 +231,7 @@
 
   /* Embedded sidebar CSS — used when styles.css cannot be fetched (e.g. after an
      extension reload invalidates chrome.runtime on an already-open tab). */
-  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-launcher.ws-has-unread::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%;margin-top:6px}.ws-msg-user.ws-msg-continued{margin-top:1px}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar-spacer{visibility:hidden;border-color:transparent;background:transparent}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:6px 10px 5px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:3px}.ws-msg-content{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 8px}.ws-msg-text{color:#eef0ff;flex:1 1 auto;min-width:0}.ws-msg-time{font-size:10px;color:#9aa0c0;line-height:1.2;flex:0 0 auto;white-space:nowrap;margin-left:auto}.ws-unread-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;list-style:none;color:#a29bfe;font-size:11px;font-weight:600}.ws-unread-divider::before,.ws-unread-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#5340d6,transparent)}.ws-msg-system{align-self:center;text-align:center;margin-top:8px;margin-bottom:4px}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}`;
+  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-launcher.ws-has-unread::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%;margin-top:6px}.ws-msg-user.ws-msg-continued{margin-top:1px}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar-spacer{visibility:hidden;border-color:transparent;background:transparent}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:6px 10px 5px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:3px}.ws-msg-content{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 8px}.ws-msg-text{color:#eef0ff;flex:1 1 auto;min-width:0}.ws-msg-time{font-size:10px;color:#9aa0c0;line-height:1.2;flex:0 0 auto;white-space:nowrap;margin-left:auto}.ws-unread-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;list-style:none;color:#a29bfe;font-size:11px;font-weight:600}.ws-unread-divider::before,.ws-unread-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#5340d6,transparent)}.ws-msg-system{align-self:center;text-align:center;margin-top:8px;margin-bottom:4px}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}.ws-emoji-popover{position:absolute;left:14px;right:14px;bottom:62px;z-index:10;border-radius:12px;overflow:hidden;border:1px solid #2c2f4a;box-shadow:0 -8px 28px rgba(0,0,0,.45);background:#21243d}.ws-emoji-picker-host{height:300px}.ws-ep{display:flex;flex-direction:column;height:100%}.ws-ep-tabs{display:flex;gap:4px;padding:8px;overflow-x:auto;border-bottom:1px solid #2c2f4a}.ws-ep-tab{width:32px;height:32px;border:none;border-radius:8px;background:transparent;font-size:18px;cursor:pointer;flex:0 0 32px}.ws-ep-tab.ws-ep-tab-active{background:rgba(108,92,231,.25)}.ws-ep-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px}.ws-ep-item{border:none;background:transparent;font-size:22px;cursor:pointer;border-radius:6px;padding:4px 0}.ws-ep-item:hover{background:rgba(255,255,255,.08)}.ws-compose{display:flex;align-items:center;gap:6px}.ws-input{border-radius:22px}.ws-icon-action{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:transparent;color:#9aa0c0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-icon-action.ws-active{color:#a29bfe;background:rgba(108,92,231,.18)}.ws-send-btn{width:36px;height:36px;padding:0;border:none;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}.ws-send-btn:disabled{opacity:.45;cursor:not-allowed}`;
 
   /* ---------------------------------------------------------------------- */
   /* PlayerController — robust abstraction over the platform's <video>      */
@@ -548,6 +548,8 @@
       this.collapsed = false;
       this.settingsOpen = false;
       this.avatarPickerOpen = false;
+      this.emojiPickerOpen = false;
+      this._emojiPickerReady = false;
 
       // The DOM is built asynchronously (we fetch styles.css). Until it is
       // ready, setter calls are buffered here and flushed once the refs exist.
@@ -714,6 +716,10 @@
           </div>
         </header>
 
+        <div class="ws-emoji-popover ws-hidden" data-ref="emojiPopover">
+          <div class="ws-emoji-picker-host" data-ref="emojiPickerHost"></div>
+        </div>
+
         <div class="ws-body">
           <div class="ws-main-view" data-ref="mainView">
             <section class="ws-room">
@@ -731,8 +737,17 @@
 
             <footer class="ws-footer">
               <form class="ws-compose" data-ref="composeForm">
-                <input class="ws-input" data-ref="msgInput" placeholder="Send a message…" maxlength="500" autocomplete="off" />
-                <button class="ws-btn" type="submit">Send</button>
+                <input class="ws-input" data-ref="msgInput" placeholder="Type a message…" maxlength="500" autocomplete="off" />
+                <button class="ws-icon-action ws-emoji-btn" type="button" data-ref="emojiBtn" title="Emoji" aria-label="Emoji">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm10 0c.83 0 1.5-.67 1.5-1.5S17.83 8 17 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-5 5.5c2.33 0 4.32-1.45 5.12-3.5H6.88c.8 2.05 2.79 3.5 5.12 3.5z"/>
+                  </svg>
+                </button>
+                <button class="ws-send-btn" type="submit" title="Send" aria-label="Send">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                  </svg>
+                </button>
               </form>
             </footer>
           </div>
@@ -782,11 +797,30 @@
     _wireEvents() {
       this.refs.composeForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const text = this.refs.msgInput.value.trim();
-        if (!text) return;
-        this.refs.msgInput.value = '';
-        this.callbacks.onSendMessage(text);
+        this._submitMessage();
       });
+
+      this.refs.msgInput.addEventListener('input', () => this._updateSendButtonState());
+      this.refs.msgInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          this._submitMessage();
+        }
+      });
+
+      this.refs.emojiBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._toggleEmojiPicker();
+      });
+
+      this._outsideEmojiClose = (e) => {
+        if (!this.emojiPickerOpen) return;
+        const path = e.composedPath ? e.composedPath() : [];
+        if (path.includes(this.refs.emojiPopover) || path.includes(this.refs.emojiBtn)) return;
+        this._toggleEmojiPicker(false);
+      };
+      this.shadow.addEventListener('click', this._outsideEmojiClose);
 
       this.refs.copyBtn.addEventListener('click', () => {
         const link = this.refs.shareInput.value;
@@ -820,6 +854,65 @@
       });
 
       this.refs.avatarBtn.addEventListener('click', () => this._toggleAvatarPicker());
+
+      this._updateSendButtonState();
+    }
+
+    _submitMessage() {
+      const text = this.refs.msgInput?.value.trim();
+      if (!text) return;
+      this.refs.msgInput.value = '';
+      this._updateSendButtonState();
+      this._toggleEmojiPicker(false);
+      this.callbacks.onSendMessage(text);
+    }
+
+    _updateSendButtonState() {
+      const hasText = !!this.refs.msgInput?.value.trim();
+      if (this.refs.composeForm) {
+        const sendBtn = this.refs.composeForm.querySelector('.ws-send-btn');
+        if (sendBtn) sendBtn.disabled = !hasText;
+      }
+    }
+
+    _insertEmojiAtCursor(emoji) {
+      const input = this.refs.msgInput;
+      if (!input || !emoji) return;
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? input.value.length;
+      const next = input.value.slice(0, start) + emoji + input.value.slice(end);
+      if (next.length > (input.maxLength || 500)) return;
+      input.value = next;
+      const pos = start + emoji.length;
+      input.setSelectionRange(pos, pos);
+      input.focus();
+      this._updateSendButtonState();
+    }
+
+    _loadEmojiPicker() {
+      if (this._emojiPickerReady || !this.refs.emojiPickerHost) return;
+      if (!window.WatchSyncEmojiPanel?.mount) {
+        console.warn('[WatchSync] Emoji panel script not loaded.');
+        return;
+      }
+      try {
+        window.WatchSyncEmojiPanel.mount(this.refs.emojiPickerHost, {
+          onPick: (emoji) => this._insertEmojiAtCursor(emoji),
+        });
+        this._emojiPickerReady = true;
+      } catch (error) {
+        console.warn('[WatchSync] Emoji picker failed to load:', error);
+      }
+    }
+
+    _toggleEmojiPicker(show) {
+      const next = typeof show === 'boolean' ? show : !this.emojiPickerOpen;
+      this.emojiPickerOpen = next;
+      if (this.refs.emojiPopover) {
+        this.refs.emojiPopover.classList.toggle('ws-hidden', !next);
+      }
+      this.refs.emojiBtn?.classList.toggle('ws-active', next);
+      if (next) this._loadEmojiPicker();
     }
 
     toggleSettings(open) {
@@ -828,6 +921,7 @@
       this.refs.settingsView?.classList.toggle('ws-hidden', !open);
       if (!open) {
         this._toggleAvatarPicker(false);
+        this._toggleEmojiPicker(false);
         this._cancelNameEdit();
       }
     }
@@ -920,6 +1014,7 @@
       if (this.collapsed) {
         this.lastReadIndex = this.messageLog.length;
         this._removeUnreadDivider();
+        this._toggleEmojiPicker(false);
         this.removeSqueeze();
       } else {
         this.applySqueeze();
@@ -1220,6 +1315,10 @@
 
     destroy() {
       try {
+        if (this._outsideEmojiClose) {
+          this.shadow.removeEventListener('click', this._outsideEmojiClose);
+          this._outsideEmojiClose = null;
+        }
         this._clearUnreadIndicator();
         this.removeSqueeze();
         if (this._squeezeTimer) {
@@ -1315,7 +1414,7 @@
 
       // Resolve the server URL from storage (popup may override the default).
       try {
-        const stored = await chrome.storage?.local.get('serverUrl');
+        const stored = await chrome.storage?.local?.get('serverUrl');
         if (stored?.serverUrl) this.serverUrl = stored.serverUrl;
       } catch {
         /* storage may be unavailable; default is fine */
@@ -1358,7 +1457,7 @@
     /** Restore the last chosen name/avatar from extension storage if needed. */
     async _hydrateProfile() {
       try {
-        const stored = await chrome.storage?.local.get(['profileName', 'profileAvatar']);
+        const stored = await chrome.storage?.local?.get(['profileName', 'profileAvatar']);
         const name =
           loadStoredName() ||
           (typeof stored?.profileName === 'string' ? stored.profileName.trim() : '');
