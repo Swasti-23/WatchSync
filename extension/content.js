@@ -33,6 +33,7 @@
   const RECONNECT_MAX_MS = 15000;
   const PANEL_WIDTH = 340; // Sidebar width in px; used to squeeze the player.
   const MIN_SQUEEZE_WIDTH = 1000; // Don't squeeze the player on small screens.
+  const MESSAGE_GROUP_GAP_MS = 5 * 60 * 1000; // Re-show sender after this gap (WhatsApp-style).
   const JOIN_GRACE_MS = 4000; // Suppress our own playback events right after joining.
   const ROOM_STORAGE_KEY = '__watchsync_room__'; // sessionStorage fallback for the room id.
   const NAME_STORAGE_KEY = '__watchsync_name__';
@@ -61,6 +62,14 @@
   /* ---------------------------------------------------------------------- */
   /* Small utilities                                                        */
   /* ---------------------------------------------------------------------- */
+
+  /** Format wall-clock time for chat bubbles (e.g. "3:42 PM"). */
+  function formatMessageTime(timestamp) {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
 
   /** Format a number of seconds as MM:SS (or H:MM:SS when >= 1 hour). */
   function formatTime(totalSeconds) {
@@ -222,7 +231,7 @@
 
   /* Embedded sidebar CSS — used when styles.css cannot be fetched (e.g. after an
      extension reload invalidates chrome.runtime on an already-open tab). */
-  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:7px 10px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:2px}.ws-msg-text{color:#eef0ff}.ws-msg-system{align-self:center;text-align:center}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}`;
+  const EMBEDDED_SIDEBAR_CSS = `:host{all:initial;position:fixed;top:0;right:0;width:340px;height:100vh;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#eef0ff;pointer-events:none}.ws-panel{pointer-events:auto;display:flex;flex-direction:column;height:100%;background:#12131f;border-left:1px solid #2c2f4a;box-shadow:-8px 0 32px rgba(0,0,0,.45);transition:transform .25s ease}.ws-panel.ws-hidden{transform:translateX(100%)}.ws-launcher{pointer-events:auto;position:fixed;top:14px;right:14px;width:46px;height:46px;border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}.ws-launcher.ws-show{display:inline-flex}.ws-launcher.ws-has-unread::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}.ws-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#6c5ce7,#5340d6)}.ws-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}.ws-dot{width:9px;height:9px;border-radius:50%;background:#b9b3ff}.ws-dot[data-state=online]{background:#2ecc71}.ws-dot[data-state=connecting]{background:#f1c40f}.ws-dot[data-state=offline]{background:#e74c3c}.ws-icon-btn{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}.ws-room{padding:10px 14px;background:#181a2c;border-bottom:1px solid #2c2f4a}.ws-room-row{display:flex;justify-content:space-between;margin-bottom:8px}.ws-status-text{font-size:12px;color:#9aa0c0}.ws-members{font-size:12px;font-weight:600;color:#a29bfe}.ws-share{display:flex;gap:6px}.ws-share-input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#cfd3f0;font-size:11px}.ws-messages{list-style:none;margin:0;padding:12px 14px;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:#12131f}.ws-msg{font-size:13px;line-height:1.4;word-break:break-word}.ws-msg-user{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-start;max-width:92%;margin-top:6px}.ws-msg-user.ws-msg-continued{margin-top:1px}.ws-msg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 28px;background:#21243d;border:1.5px solid #5340d6}.ws-msg-avatar-spacer{visibility:hidden;border-color:transparent;background:transparent}.ws-msg-avatar svg{width:100%;height:100%;display:block}.ws-msg-body{background:#1d2036;padding:6px 10px 5px;border-radius:10px;min-width:0;flex:1}.ws-msg-sender{display:block;font-size:11px;font-weight:700;color:#a29bfe;margin-bottom:3px}.ws-msg-content{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 8px}.ws-msg-text{color:#eef0ff;flex:1 1 auto;min-width:0}.ws-msg-time{font-size:10px;color:#9aa0c0;line-height:1.2;flex:0 0 auto;white-space:nowrap;margin-left:auto}.ws-unread-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;list-style:none;color:#a29bfe;font-size:11px;font-weight:600}.ws-unread-divider::before,.ws-unread-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#5340d6,transparent)}.ws-msg-system{align-self:center;text-align:center;margin-top:8px;margin-bottom:4px}.ws-msg-system-text{display:inline-block;font-size:11.5px;color:#ffd479;background:rgba(255,212,121,.08);padding:4px 10px;border-radius:999px}.ws-footer{padding:10px 14px 14px;background:#181a2c;border-top:1px solid #2c2f4a}.ws-input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff;font-size:13px}.ws-compose{display:flex;gap:6px}.ws-btn{padding:9px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;font-weight:600;font-size:13px;cursor:pointer}.ws-btn-sm{padding:7px 10px;font-size:11px}.ws-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ws-main-view,.ws-settings-view{flex:1;display:flex;flex-direction:column;min-height:0}.ws-hidden{display:none!important}.ws-settings-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2c2f4a}.ws-back-btn{width:30px;height:30px;border:none;border-radius:8px;background:#21243d;color:#eef0ff;cursor:pointer}.ws-profile-card{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}.ws-avatar-display{width:92px;height:92px;border-radius:50%;overflow:hidden;border:3px solid #6c5ce7;background:#21243d}.ws-avatar-display svg{width:100%;height:100%}.ws-profile-name{font-size:17px;font-weight:700}.ws-pencil-btn{width:28px;height:28px;border:none;border-radius:8px;background:#21243d;color:#a29bfe;cursor:pointer}.ws-name-edit-row{display:flex;gap:8px;width:100%}.ws-name-edit-input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #2c2f4a;background:#21243d;color:#eef0ff}.ws-avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px}.ws-avatar-option{border:2px solid transparent;border-radius:14px;padding:6px;background:#1d2036;cursor:pointer}.ws-avatar-option.ws-selected{border-color:#a29bfe}`;
 
   /* ---------------------------------------------------------------------- */
   /* PlayerController — robust abstraction over the platform's <video>      */
@@ -545,6 +554,12 @@
       // This is what fixes the "share link never appears" race.
       this.ready = false;
       this._pending = { messages: [] };
+      this.messageLog = [];
+      this.lastReadIndex = 0;
+      this.unreadCount = 0;
+      this._lastUserBlock = null;
+      this._unreadDividerEl = null;
+      this._msgSeq = 0;
       this._keyGuard = null;
       this._squeezed = null; // { el, original inline styles } while squeezing.
       this._squeezeTimer = null;
@@ -647,7 +662,9 @@
       if (p.shareLink != null) this.setShareLink(p.shareLink);
       if (p.status) this.setStatus(p.status.text, p.status.state);
       if (p.memberCount != null) this.setMemberCount(p.memberCount);
-      for (const msg of p.messages) this.addMessage(msg);
+      for (const item of p.messages) {
+        this.addMessage(item.msg, { notify: item.notify });
+      }
       this._pending = { messages: [] };
     }
 
@@ -894,15 +911,23 @@
     }
 
     toggleCollapse() {
+      const wasCollapsed = this.collapsed;
       this.collapsed = !this.collapsed;
       const panel = this.shadow.querySelector('.ws-panel');
       panel.classList.toggle('ws-hidden', this.collapsed);
       this.refs.launcher?.classList.toggle('ws-show', this.collapsed);
       document.documentElement.classList.toggle('watchsync-active', !this.collapsed);
       if (this.collapsed) {
+        this.lastReadIndex = this.messageLog.length;
+        this._removeUnreadDivider();
         this.removeSqueeze();
       } else {
         this.applySqueeze();
+        if (wasCollapsed) {
+          this._insertUnreadDivider();
+          this._clearUnreadIndicator();
+          this.lastReadIndex = this.messageLog.length;
+        }
       }
     }
 
@@ -1046,36 +1071,156 @@
       }
     }
 
-    addMessage({ sender, text, kind, avatar }) {
-      if (!this.ready) {
-        this._pending.messages.push({ sender, text, kind, avatar });
-        return;
-      }
-      if (!this.refs.messages) return;
+    _shouldShowSenderHeader(sender, timestamp) {
+      const prev = this._lastUserBlock;
+      if (!prev || prev.sender !== sender) return true;
+      return timestamp - prev.timestamp > MESSAGE_GROUP_GAP_MS;
+    }
+
+    _createMessageElement(entry) {
+      const { sender, text, kind, avatar, timestamp } = entry;
       const li = document.createElement('li');
       li.className = `ws-msg ws-msg-${kind || 'user'}`;
+      li.dataset.msgId = String(entry.id);
 
       if (kind === 'system') {
+        this._lastUserBlock = null;
+        li.className = 'ws-msg ws-msg-system';
         li.innerHTML = `<span class="ws-msg-system-text">${escapeHtml(text)}</span>`;
-      } else {
-        const av = resolveAvatarId(sender, avatar);
-        li.innerHTML =
-          `<span class="ws-msg-avatar" aria-hidden="true">${window.WatchSyncAvatars?.getSvg(av) || ''}</span>` +
-          `<div class="ws-msg-body">` +
-          `<span class="ws-msg-sender">${escapeHtml(sender)}</span>` +
-          `<span class="ws-msg-text">${escapeHtml(text)}</span>` +
-          `</div>`;
+        return li;
       }
 
-      const atBottom =
+      const showHeader = this._shouldShowSenderHeader(sender, timestamp);
+      if (showHeader) {
+        li.classList.add('ws-msg-new-block');
+      } else {
+        li.classList.add('ws-msg-continued');
+      }
+      this._lastUserBlock = { sender, timestamp };
+
+      const av = resolveAvatarId(sender, avatar);
+      const avatarHtml = showHeader
+        ? `<span class="ws-msg-avatar" aria-hidden="true">${window.WatchSyncAvatars?.getSvg(av) || ''}</span>`
+        : `<span class="ws-msg-avatar ws-msg-avatar-spacer" aria-hidden="true"></span>`;
+
+      const senderHtml = showHeader
+        ? `<span class="ws-msg-sender">${escapeHtml(sender)}</span>`
+        : '';
+
+      li.innerHTML =
+        avatarHtml +
+        `<div class="ws-msg-body">` +
+        senderHtml +
+        `<div class="ws-msg-content">` +
+        `<span class="ws-msg-text">${escapeHtml(text)}</span>` +
+        `<span class="ws-msg-time">${escapeHtml(formatMessageTime(timestamp))}</span>` +
+        `</div></div>`;
+      return li;
+    }
+
+    _isNearBottom() {
+      if (!this.refs.messages) return true;
+      return (
         this.refs.messages.scrollHeight - this.refs.messages.scrollTop -
-          this.refs.messages.clientHeight < 60;
+          this.refs.messages.clientHeight < 60
+      );
+    }
+
+    _scrollMessagesToBottom() {
+      if (!this.refs.messages) return;
+      this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+    }
+
+    _incrementUnread() {
+      this.unreadCount += 1;
+      this._syncExtensionBadge();
+      this.refs.launcher?.classList.add('ws-has-unread');
+    }
+
+    _clearUnreadIndicator() {
+      this.unreadCount = 0;
+      this._syncExtensionBadge();
+      this.refs.launcher?.classList.remove('ws-has-unread');
+    }
+
+    _syncExtensionBadge() {
+      if (!isExtensionContextValid()) return;
+      try {
+        chrome.runtime.sendMessage({
+          type: 'WS_SET_BADGE',
+          count: this.unreadCount,
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    _insertUnreadDivider() {
+      this._removeUnreadDivider();
+      if (this.lastReadIndex >= this.messageLog.length) return;
+
+      const firstUnread = this.messageLog[this.lastReadIndex];
+      if (!firstUnread?.el) return;
+
+      const unreadCount = this.messageLog.length - this.lastReadIndex;
+      const divider = document.createElement('li');
+      divider.className = 'ws-unread-divider';
+      divider.setAttribute('role', 'separator');
+      divider.innerHTML = `<span>${unreadCount} unread message${unreadCount === 1 ? '' : 's'}</span>`;
+      this.refs.messages.insertBefore(divider, firstUnread.el);
+      this._unreadDividerEl = divider;
+
+      requestAnimationFrame(() => {
+        divider.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
+    }
+
+    _removeUnreadDivider() {
+      this._unreadDividerEl?.remove();
+      this._unreadDividerEl = null;
+    }
+
+    addMessage(msg, options = {}) {
+      const notify = !!options.notify;
+      const timestamp = msg.timestamp ?? Date.now();
+      const entry = {
+        sender: msg.sender,
+        text: msg.text,
+        kind: msg.kind || 'user',
+        avatar: msg.avatar,
+        timestamp,
+        id: ++this._msgSeq,
+        el: null,
+      };
+
+      if (!this.ready) {
+        this._pending.messages.push({ msg: entry, notify });
+        return;
+      }
+
+      if (!this.refs.messages) return;
+
+      const atBottom = this._isNearBottom();
+      const li = this._createMessageElement(entry);
+      entry.el = li;
+      this.messageLog.push(entry);
       this.refs.messages.appendChild(li);
-      if (atBottom) this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+
+      if (options.dismissUnread) {
+        this._removeUnreadDivider();
+      }
+
+      if (this.collapsed && notify) {
+        this._incrementUnread();
+      } else if (!this.collapsed) {
+        this.lastReadIndex = this.messageLog.length;
+        if (atBottom) this._scrollMessagesToBottom();
+      }
     }
 
     destroy() {
       try {
+        this._clearUnreadIndicator();
         this.removeSqueeze();
         if (this._squeezeTimer) {
           clearInterval(this._squeezeTimer);
@@ -1360,10 +1505,13 @@
             const t = this.player.getCurrentTime();
             this.player.applyRemote('pause', t > 0 ? t : undefined);
           }
-          this.ui.addMessage({
-            kind: 'system',
-            text: `⚡ You joined the party as ${this.selfName}.`,
-          });
+          this.ui.addMessage(
+            {
+              kind: 'system',
+              text: `⚡ You joined the party as ${this.selfName}.`,
+            },
+            { notify: false }
+          );
           break;
         }
 
@@ -1373,7 +1521,10 @@
             this.members.set(m.clientId, m.name);
             if (m.avatar) this.peerAvatars.set(m.name, m.avatar);
             this.ui.setMemberCount(this.members.size);
-            this.ui.addMessage({ kind: 'system', text: `⚡ ${m.name} joined the party.` });
+            this.ui.addMessage(
+              { kind: 'system', text: `⚡ ${m.name} joined the party.` },
+              { notify: true }
+            );
             // Catch the newcomer up to where we currently are so their freshly
             // loaded player jumps to the right spot instead of staying at 0.
             this.sendCatchUpState();
@@ -1387,7 +1538,10 @@
           // If they left mid-ad, don't keep everyone else paused for them.
           if (this.remoteAdClients.delete(message.clientId)) this.reconcileAds();
           if (message.name) {
-            this.ui.addMessage({ kind: 'system', text: `⚡ ${message.name} left the party.` });
+            this.ui.addMessage(
+              { kind: 'system', text: `⚡ ${message.name} left the party.` },
+              { notify: true }
+            );
           }
           break;
         }
@@ -1396,10 +1550,13 @@
           const old = this.members.get(message.clientId);
           this.members.set(message.clientId, message.name);
           if (message.avatar) this.peerAvatars.set(message.name, message.avatar);
-          this.ui.addMessage({
-            kind: 'system',
-            text: `⚡ ${old || 'A guest'} is now ${message.name}.`,
-          });
+          this.ui.addMessage(
+            {
+              kind: 'system',
+              text: `⚡ ${old || 'A guest'} is now ${message.name}.`,
+            },
+            { notify: false }
+          );
           break;
         }
 
@@ -1427,12 +1584,15 @@
           if (p.type !== 'system' && p.sender && p.avatar) {
             this.peerAvatars.set(p.sender, p.avatar);
           }
-          this.ui.addMessage({
-            kind: p.type === 'system' ? 'system' : 'user',
-            sender: p.sender,
-            text: p.text,
-            avatar: p.avatar || this.peerAvatars.get(p.sender),
-          });
+          this.ui.addMessage(
+            {
+              kind: p.type === 'system' ? 'system' : 'user',
+              sender: p.sender,
+              text: p.text,
+              avatar: p.avatar || this.peerAvatars.get(p.sender),
+            },
+            { notify: p.type !== 'system' }
+          );
           break;
         }
 
@@ -1667,17 +1827,20 @@
         avatar: this.selfAvatar,
       };
       this.send('CHAT_MESSAGE', { payload });
-      this.ui.addMessage({
-        kind: 'user',
-        sender: this.selfName,
-        text,
-        avatar: this.selfAvatar,
-      });
+      this.ui.addMessage(
+        {
+          kind: 'user',
+          sender: this.selfName,
+          text,
+          avatar: this.selfAvatar,
+        },
+        { notify: false, dismissUnread: true }
+      );
     }
 
     /** Render a system message locally and mirror it to peers. */
     broadcastSystemMessage(text) {
-      this.ui.addMessage({ kind: 'system', text });
+      this.ui.addMessage({ kind: 'system', text }, { notify: false });
       this.send('CHAT_MESSAGE', { payload: { text, sender: 'system', type: 'system' } });
     }
 

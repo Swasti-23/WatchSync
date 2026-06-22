@@ -59,10 +59,27 @@ async function ensureContentScript(tabId) {
   }
 }
 
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request?.type === 'WS_ENSURE_INJECTED' && typeof request.tabId === 'number') {
     ensureContentScript(request.tabId).then((ok) => sendResponse({ ok }));
     return true; // async response
   }
+
+  if (request?.type === 'WS_SET_BADGE' && sender.tab?.id != null) {
+    const tabId = sender.tab.id;
+    const count = Number(request.count) || 0;
+    try {
+      if (count > 0) {
+        chrome.action.setBadgeText({ tabId, text: '•' });
+        chrome.action.setBadgeBackgroundColor({ tabId, color: '#e74c3c' });
+      } else {
+        chrome.action.setBadgeText({ tabId, text: '' });
+      }
+    } catch (error) {
+      console.warn('[WatchSync][bg] Failed to set badge:', error);
+    }
+    return false;
+  }
+
   return false;
 });

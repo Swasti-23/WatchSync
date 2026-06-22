@@ -87,6 +87,18 @@
 .ws-launcher.ws-show {
   display: inline-flex;
 }
+.ws-launcher.ws-has-unread::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e74c3c;
+  border: 2px solid #5340d6;
+  box-sizing: border-box;
+}
 
 /* ---------- Header ---------- */
 .ws-header {
@@ -370,7 +382,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   background: #12131f;
 }
 .ws-messages::-webkit-scrollbar {
@@ -395,6 +407,10 @@
   max-width: 92%;
   background: transparent;
   padding: 0;
+  margin-top: 6px;
+}
+.ws-msg-user.ws-msg-continued {
+  margin-top: 1px;
 }
 .ws-msg-avatar {
   width: 28px;
@@ -406,6 +422,12 @@
   border: 1.5px solid #5340d6;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
+.ws-msg-avatar-spacer {
+  visibility: hidden;
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
+}
 .ws-msg-avatar svg {
   width: 100%;
   height: 100%;
@@ -413,7 +435,7 @@
 }
 .ws-msg-body {
   background: #1d2036;
-  padding: 7px 10px;
+  padding: 6px 10px 5px;
   border-radius: 10px;
   min-width: 0;
   flex: 1 1 auto;
@@ -423,15 +445,51 @@
   font-size: 11px;
   font-weight: 700;
   color: #a29bfe;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+}
+.ws-msg-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 8px;
 }
 .ws-msg-user .ws-msg-text {
   color: #eef0ff;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ws-msg-time {
+  font-size: 10px;
+  color: #9aa0c0;
+  line-height: 1.2;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.ws-unread-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 10px;
+  list-style: none;
+  color: #a29bfe;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.ws-unread-divider::before,
+.ws-unread-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #5340d6, transparent);
 }
 .ws-msg-system {
   align-self: center;
   text-align: center;
   max-width: 100%;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 .ws-msg-system-text {
   display: inline-block;
