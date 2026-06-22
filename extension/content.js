@@ -39,6 +39,7 @@
   const NAME_STORAGE_KEY = '__watchsync_name__';
   const AVATAR_STORAGE_KEY = '__watchsync_avatar__';
   const AD_POLL_MS = 700; // How often to check ad / navigation state.
+  const FULLSCREEN_NOTIFY_MS = 5000; // How long the fullscreen alert icon stays visible.
   const FRAME_MSG = '__WATCHSYNC_FRAME__'; // postMessage tag for cross-frame bridging.
   const CATCHUP_DELAYS_MS = [300, 900, 1800, 3500, 6000]; // Retry catch-up for late-mounting players.
   const IS_TOP_FRAME = (() => {
@@ -635,6 +636,10 @@
       this._squeezed = null; // { el, original inline styles } while squeezing.
       this._squeezeTimer = null;
       this._onResize = null;
+      this._fsNotifyEl = null;
+      this._fsNotifyTimer = null;
+      this._fsNotifyHideTimer = null;
+      this._onFullscreenChange = null;
 
       this._build();
     }
@@ -697,6 +702,133 @@
         }
       }, 1000);
       this.applySqueeze();
+      this._setupFullscreenListeners();
+    }
+
+    _getFullscreenElement() {
+      return (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        null
+      );
+    }
+
+    _isVideoFullscreen() {
+      return !!this._getFullscreenElement();
+    }
+
+    _ensureFullscreenNotifyStyles() {
+      if (document.getElementById('watchsync-fs-notify-style')) return;
+      const style = document.createElement('style');
+      style.id = 'watchsync-fs-notify-style';
+      style.textContent =
+        '#watchsync-fs-notify{position:fixed;top:16px;right:16px;z-index:2147483647;width:48px;height:48px;' +
+        'border:none;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,#6c5ce7,#a29bfe);' +
+        'color:#fff;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;' +
+        'box-shadow:0 6px 24px rgba(0,0,0,.55);opacity:0;transform:scale(.85);pointer-events:none;' +
+        'transition:opacity .25s ease,transform .25s ease;font-family:-apple-system,BlinkMacSystemFont,sans-serif}' +
+        '#watchsync-fs-notify.ws-fs-notify-visible{opacity:1;transform:scale(1);pointer-events:auto}' +
+        '#watchsync-fs-notify.ws-fs-notify-leaving{opacity:0;transform:scale(.85);pointer-events:none}' +
+        '#watchsync-fs-notify::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;' +
+        'border-radius:50%;background:#e74c3c;border:2px solid #5340d6;box-sizing:border-box}';
+      (document.head || document.documentElement).appendChild(style);
+    }
+
+    _setupFullscreenListeners() {
+      this._onFullscreenChange = () => {
+        if (!this._isVideoFullscreen()) {
+          this._hideFullscreenNotify(true);
+        }
+      };
+      document.addEventListener('fullscreenchange', this._onFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', this._onFullscreenChange);
+    }
+
+    _teardownFullscreenNotify() {
+      clearTimeout(this._fsNotifyTimer);
+      clearTimeout(this._fsNotifyHideTimer);
+      this._fsNotifyTimer = null;
+      this._fsNotifyHideTimer = null;
+      this._fsNotifyEl?.remove();
+      this._fsNotifyEl = null;
+      if (this._onFullscreenChange) {
+        document.removeEventListener('fullscreenchange', this._onFullscreenChange);
+        document.removeEventListener('webkitfullscreenchange', this._onFullscreenChange);
+        this._onFullscreenChange = null;
+      }
+      document.getElementById('watchsync-fs-notify-style')?.remove();
+    }
+
+    /** Brief ⚡ icon inside native fullscreen — the sidebar is hidden there. */
+    _showFullscreenNotify() {
+      const root = this._getFullscreenElement();
+      if (!root) return;
+
+      this._ensureFullscreenNotifyStyles();
+
+      if (!this._fsNotifyEl) {
+        const btn = document.createElement('button');
+        btn.id = 'watchsync-fs-notify';
+        btn.type = 'button';
+        btn.title = 'New WatchSync message — open chat';
+        btn.setAttribute('aria-label', 'New WatchSync message');
+        btn.textContent = '⚡';
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          this._hideFullscreenNotify(true);
+          try {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          } catch {
+            /* ignore */
+          }
+          if (this.collapsed) {
+            this.toggleCollapse();
+          } else {
+            this._clearUnreadIndicator();
+            this.lastReadIndex = this.messageLog.length;
+          }
+        });
+        this._fsNotifyEl = btn;
+      }
+
+      const el = this._fsNotifyEl;
+      if (el.parentElement !== root) {
+        root.appendChild(el);
+      }
+
+      clearTimeout(this._fsNotifyHideTimer);
+      el.classList.remove('ws-fs-notify-leaving');
+      void el.offsetWidth;
+      el.classList.add('ws-fs-notify-visible');
+
+      clearTimeout(this._fsNotifyTimer);
+      this._fsNotifyTimer = setTimeout(
+        () => this._hideFullscreenNotify(false),
+        FULLSCREEN_NOTIFY_MS
+      );
+    }
+
+    _hideFullscreenNotify(immediate) {
+      const el = this._fsNotifyEl;
+      if (!el) return;
+      clearTimeout(this._fsNotifyTimer);
+      this._fsNotifyTimer = null;
+      el.classList.remove('ws-fs-notify-visible');
+      if (immediate) {
+        el.classList.remove('ws-fs-notify-leaving');
+        el.remove();
+        return;
+      }
+      el.classList.add('ws-fs-notify-leaving');
+      clearTimeout(this._fsNotifyHideTimer);
+      this._fsNotifyHideTimer = setTimeout(() => {
+        el.classList.remove('ws-fs-notify-leaving');
+        el.remove();
+      }, 280);
     }
 
     /**
@@ -1396,8 +1528,16 @@
         this._removeUnreadDivider();
       }
 
-      if (this.collapsed && notify) {
-        this._incrementUnread();
+      if (notify) {
+        if (this._isVideoFullscreen() || this.collapsed) {
+          this._incrementUnread();
+        }
+        if (this._isVideoFullscreen()) {
+          this._showFullscreenNotify();
+        } else if (!this.collapsed) {
+          this.lastReadIndex = this.messageLog.length;
+          if (atBottom) this._scrollMessagesToBottom();
+        }
       } else if (!this.collapsed) {
         this.lastReadIndex = this.messageLog.length;
         if (atBottom) this._scrollMessagesToBottom();
@@ -1426,6 +1566,7 @@
           }
           this._keyGuard = null;
         }
+        this._teardownFullscreenNotify();
         document.documentElement.classList.remove('watchsync-active');
         document.getElementById('watchsync-host-style')?.remove();
         this.hostEl?.remove();
