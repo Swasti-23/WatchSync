@@ -509,14 +509,19 @@
   border-top: 1px solid #2c2f4a;
   position: relative;
 }
+.ws-reaction-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid rgba(44, 47, 74, 0.65);
+  margin-bottom: 8px;
+}
 .ws-reaction-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 0 2px 8px;
-  border-bottom: 1px solid rgba(44, 47, 74, 0.65);
-  margin-bottom: 8px;
 }
 .ws-reaction-btn {
   flex: 1 1 0;
@@ -541,7 +546,7 @@
   position: absolute;
   left: 14px;
   right: 14px;
-  bottom: 112px;
+  bottom: 152px;
   z-index: 10;
   border-radius: 12px;
   overflow: hidden;
