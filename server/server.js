@@ -300,8 +300,7 @@ function handleMessage(state, message) {
       broadcastToRoom(
         state.roomId,
         'REACTION',
-        { from: state.clientId, payload: message.payload || {} },
-        state.clientId
+        { from: state.clientId, payload: message.payload || {} }
       );
       break;
     }

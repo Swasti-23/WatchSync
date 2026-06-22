@@ -549,14 +549,32 @@
   class ReactionLayer {
     constructor() {
       this._ensureStyles();
-      let layer = document.getElementById('watchsync-reaction-layer');
-      if (!layer) {
-        layer = document.createElement('div');
-        layer.id = 'watchsync-reaction-layer';
-        layer.setAttribute('aria-hidden', 'true');
-        (document.documentElement || document.body).appendChild(layer);
+      this.layer = document.createElement('div');
+      this.layer.id = 'watchsync-reaction-layer';
+      this.layer.setAttribute('aria-hidden', 'true');
+      this._onFullscreenChange = () => this._mountLayer();
+      document.addEventListener('fullscreenchange', this._onFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', this._onFullscreenChange);
+      this._mountLayer();
+    }
+
+    _getFullscreenElement() {
+      return (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        null
+      );
+    }
+
+    /** Keep the overlay inside native fullscreen so reactions stay visible on the video. */
+    _mountLayer() {
+      const root =
+        this._getFullscreenElement() || document.documentElement || document.body;
+      if (this.layer && this.layer.parentElement !== root) {
+        root.appendChild(this.layer);
       }
-      this.layer = layer;
     }
 
     _ensureStyles() {
@@ -578,6 +596,7 @@
 
     spawn(emoji) {
       if (!this.layer || !emoji) return;
+      this._mountLayer();
       const el = document.createElement('div');
       el.className = 'ws-float-reaction';
       el.textContent = emoji;
@@ -592,6 +611,9 @@
 
     destroy() {
       try {
+        document.removeEventListener('fullscreenchange', this._onFullscreenChange);
+        document.removeEventListener('webkitfullscreenchange', this._onFullscreenChange);
+        this._onFullscreenChange = null;
         this.layer?.replaceChildren();
         this.layer?.remove();
         this.layer = null;
@@ -1914,6 +1936,11 @@
 
         case 'CHAT_MESSAGE': {
           const p = message.payload || {};
+          if (p.type === 'reaction') {
+            const reaction = REACTION_BY_ID[p.id];
+            if (reaction) this.reactionLayer?.spawn(reaction.emoji);
+            break;
+          }
           if (p.type !== 'system' && p.sender && p.avatar) {
             this.peerAvatars.set(p.sender, p.avatar);
           }
@@ -1930,6 +1957,8 @@
         }
 
         case 'REACTION': {
+          // Native relay (requires an updated signaling server). CHAT_MESSAGE
+          // with type "reaction" is used as the primary path for compatibility.
           const p = message.payload || {};
           const reaction = REACTION_BY_ID[p.id];
           if (reaction) this.reactionLayer?.spawn(reaction.emoji);
@@ -2163,8 +2192,15 @@
       const reaction = REACTION_BY_ID[reactionId];
       if (!reaction) return;
       this.reactionLayer?.spawn(reaction.emoji);
-      this.send('REACTION', {
-        payload: { id: reactionId, sender: this.selfName },
+      // Route through CHAT_MESSAGE so reactions work on older signaling servers
+      // that do not yet recognize the REACTION message type.
+      this.send('CHAT_MESSAGE', {
+        payload: {
+          type: 'reaction',
+          id: reactionId,
+          sender: this.selfName,
+          text: '',
+        },
       });
     }
 
